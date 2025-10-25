@@ -6,24 +6,28 @@ import nodemailer from 'nodemailer'
 
 const app = express()
 
-app.use(cors())
 
-// app.use(cors({
-//   origin: 'https://glorious-space-sniffle-q5r6w755g4qf4gg7-5173.app.github.dev',
-//   credentials: true
-// }));
+
+app.use(cors({
+  origin: [
+    "https://studious-halibut-gv96g4vvwqjc6x7-3000.app.github.dev", // your frontend URL
+    "https://webli.vercel.app", // add production URL if any
+  ],
+  methods: ["GET", "POST"],
+  credentials: true,
+}));
 
 app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 app.use(express.static("public"));
 
-app.get('/', async(req, res)=>{
-  try{
-    res.status(200).json({ success: true, message: 'First req recieved' })
-  }catch(err){
+app.get("/", async (req, res) => {
+  try {
+    res.status(200).json({ success: true, message: "First req received" });
+  } catch (err) {
     res.status(500).json({ success: false, message: err });
   }
-})
+});
 
 app.post('/send', async (req,res)=>{
   const {name, email, company, subject, message} = req.body;
