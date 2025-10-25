@@ -17,6 +17,14 @@ app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 app.use(express.static("public"));
 
+app.get('/', async(req, res)=>{
+  try{
+    res.status(200).json({ success: true, message: 'First req recieved' })
+  }catch(err){
+    res.status(500).json({ success: false, message: err });
+  }
+})
+
 app.post('/send', async (req,res)=>{
   const {name, email, company, subject, message} = req.body;
 
