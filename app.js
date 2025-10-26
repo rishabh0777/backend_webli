@@ -30,7 +30,12 @@ app.get("/", async (req, res) => {
 });
 
 app.post('/send', async (req,res)=>{
+  if(req.body){
   const {name, email, company, subject, message} = req.body;
+  if(!name || !email || !company || !subject || !message){
+    return res.status(400).json({ success: false, message: "All fields are required" });
+  }
+  }
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -39,6 +44,7 @@ app.post('/send', async (req,res)=>{
       pass: process.env.EMAIL_PASS
     }
   });
+
 
  const mailOptions = {
   from: `"${name} via Webli" <${process.env.EMAIL_USER}>`,
