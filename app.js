@@ -28,35 +28,37 @@ app.get("/", (req, res) => {
 app.post("/send", async (req, res) => {
   const { name, email, company, subject, message } = req.body;
 
-    
+  // Basic validation
+  if (!name || !email || !company || !subject || !message) {
+    return res.status(400).json({
+      success: false,
+      message: "All fields are required",
+    });
+  }
 
-    // Validate body
-    if (!name || !email || !company || !subject || !message) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
-    }
+  // Check environment variables
+  if (!process.env.BREVO_USER || !process.env.BREVO_API_KEY || !process.env.RECIEVER_EMAIL) {
+    return res.status(500).json({
+      success: false,
+      message: "Email credentials not configured properly",
+    });
+  }
 
-    // Validate environment variables
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.RECIEVER_EMAIL) {
-      return res
-        .status(500)
-        .json({ success: false, message: "Email credentials not configured properly" });
-    }
-
-    try {
-      // Setup transporter
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+  try {
+    // Configure Brevo SMTP transporter
+    const transporter = nodemailer.createTransport({
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false, // use TLS
+      auth: {
+        user: process.env.BREVO_USER, // example: 9a32af001@smtp-brevo.com
+        pass: process.env.BREVO_API_KEY, // your SMTP key from Brevo
       },
     });
 
-    // Email options
+    // Email template
     const mailOptions = {
-      from: `"${name} via Webli" <${process.env.EMAIL_USER}>`,
+      from: `"${name} via Webli" <${process.env.BREVO_USER}>`,
       to: process.env.RECIEVER_EMAIL,
       replyTo: email,
       subject: `Webli Message from ${name} (${email})`,
@@ -77,14 +79,14 @@ app.post("/send", async (req, res) => {
     };
 
     // Send email
-   await transporter.sendMail(mailOptions);
-    res.json({ success: true, message: "✅ Email sent successfully." });
-
-  }  catch (err) {
-    console.error("❌ Email error:", err.message);
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true, message: "✅ Email sent successfully via Brevo." });
+  } catch (err) {
+    console.error("❌ Email error:", err);
     res.status(500).json({ success: false, message: "Email sending failed." });
   }
 });
+
 
 export default app;
 
