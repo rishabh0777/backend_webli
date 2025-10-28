@@ -26,33 +26,35 @@ app.get("/", (req, res) => {
 });
 
 app.post("/send", async (req, res) => {
-  try {
-    const { name, email, company, subject, message } = req.body;
+  const { name, email, company, subject, message } = req.body;
 
-    // ✅ Step 1: Validate body
+    
+
+    // Validate body
     if (!name || !email || !company || !subject || !message) {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required" });
     }
 
-    // ✅ Step 2: Validate environment variables
+    // Validate environment variables
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.RECIEVER_EMAIL) {
       return res
         .status(500)
         .json({ success: false, message: "Email credentials not configured properly" });
     }
 
-    // ✅ Step 3: Setup transporter
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
+    try {
+      // Setup transporter
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
 
-    // ✅ Step 4: Email options
+    // Email options
     const mailOptions = {
       from: `"${name} via Webli" <${process.env.EMAIL_USER}>`,
       to: process.env.RECIEVER_EMAIL,
@@ -74,17 +76,18 @@ app.post("/send", async (req, res) => {
       `,
     };
 
-    // ✅ Step 5: Send email
-    await transporter.sendMail(mailOptions);
+    // Send email
+   await transporter.sendMail(mailOptions);
+    res.json({ success: true, message: "✅ Email sent successfully." });
 
-    res.status(200).json({ success: true, message: "Email sent successfully" });
-  } catch (error) {
-    console.error("Email error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to send email",
-    });
+  }  catch (err) {
+    console.error("❌ Email error:", err.message);
+    res.status(500).json({ success: false, message: "Email sending failed." });
   }
 });
 
 export default app;
+
+
+
+
