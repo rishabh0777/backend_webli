@@ -25,68 +25,53 @@ app.get("/", (req, res) => {
   res.status(200).json({ success: true, message: "First req received" });
 });
 
+// ✅ Gmail Send Route
 app.post("/send", async (req, res) => {
   const { name, email, company, subject, message } = req.body;
 
-  // Basic validation
-  if (!name || !email || !company || !subject || !message) {
-    return res.status(400).json({
-      success: false,
-      message: "All fields are required",
-    });
-    console.log('all fields are required')
-  }
-
-  // Check environment variables
-  if (!process.env.BREVO_USER || !process.env.BREVO_API_KEY || !process.env.RECIEVER_EMAIL) {
-    return res.status(500).json({
-      success: false,
-      message: "Email credentials not configured properly",
-    });
-    console.log('email credentials not configured properly')
+  if (!name || !email || !subject || !message || !company) {
+    return res
+      .status(400)
+      .json({ success: false, message: "All fields are required" });
   }
 
   try {
-    // Configure Brevo SMTP transporter
+    // ✅ Gmail transporter
     const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      secure: false, // use TLS
+      service: "gmail",
       auth: {
-        user: process.env.BREVO_USER, // example: 9a32af001@smtp-brevo.com
-        pass: process.env.BREVO_API_KEY, // your SMTP key from Brevo
+        user: process.env.GMAIL_USER, // your Gmail address
+        pass: process.env.GMAIL_APP_PASS, // app password (not your login password)
       },
     });
-    console.log('Brevo SMTP transporter configured');
 
-    // Email template
+    // ✅ Email format
     const mailOptions = {
-      from: `"${name} via Webli" <${process.env.BREVO_USER}>`,
-      to: process.env.RECIEVER_EMAIL,
+      from: `"${name} via Webli" <${process.env.GMAIL_USER}>`,
+      to: process.env.RECEIVER_EMAIL, // where you want to receive messages
       replyTo: email,
-      subject: `Webli Message from ${name} (${email})`,
+      subject: `New Inquiry from ${name} - ${company}`,
       html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f9f9f9; padding: 20px; border-radius: 10px;">
-          <h2 style="color: #2a2a2a;">New Contact Submission</h2>
+        <div style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px; border-radius:10px;">
+          <h2 style="color:#333;">New Contact Message</h2>
           <p><strong>Name:</strong> ${name}</p>
           <p><strong>Company:</strong> ${company}</p>
-          <p><strong>Email:</strong> <a href="mailto:${email}" style="color: #1a73e8;">${email}</a></p>
+          <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
           <p><strong>Subject:</strong> ${subject}</p>
-          <hr style="border: none; border-top: 1px solid #ddd;" />
-          <p style="margin-top: 20px;"><strong>Message:</strong></p>
-          <div style="background: #fff; padding: 15px; border-left: 4px solid #1a73e8; border-radius: 5px;">
+          <p><strong>Message:</strong></p>
+          <div style="background:#fff; padding:10px; border-left:4px solid #4caf50;">
             ${message.replace(/\n/g, "<br>")}
           </div>
         </div>
       `,
     };
 
-    // Send email
     await transporter.sendMail(mailOptions);
-    res.json({ success: true, message: "✅ Email sent successfully via Brevo." });
-  } catch (err) {
-    console.error("❌ Email error:", err);
-    res.status(500).json({ success: false, message: "Email sending failed." });
+    console.log("✅ Email sent successfully!");
+    res.status(200).json({ success: true, message: "Email sent successfully!" });
+  } catch (error) {
+    console.error("❌ Email sending failed:", error);
+    res.status(500).json({ success: false, message: "Failed to send email" });
   }
 });
 
