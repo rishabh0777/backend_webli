@@ -17,6 +17,8 @@ app.use(
   })
 );
 
+console.log("Receiver Email:", process.env.RECIEVER_EMAIL);
+
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
@@ -48,7 +50,7 @@ app.post("/send", async (req, res) => {
     // ✅ Email format
     const mailOptions = {
       from: `"${name} via Webli" <${process.env.GMAIL_USER}>`,
-      to: process.env.RECEIVER_EMAIL, // where you want to receive messages
+      to: process.env.RECIEVER_EMAIL, // where you want to receive messages
       replyTo: email,
       subject: `New Inquiry from ${name} - ${company}`,
       html: `
