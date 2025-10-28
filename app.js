@@ -2,9 +2,9 @@ import { configDotenv } from "dotenv";
 configDotenv();
 import cors from "cors";
 import express from "express";
-import * as sgMail from "@sendgrid/mail";
-
+import sgMail from "@sendgrid/mail";
 const app = express();
+
 
 app.use(
   cors({
