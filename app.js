@@ -9,7 +9,7 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://studious-halibut-gv96g4vvwqjc6x7-3000.app.github.dev",
+      "https://studious-halibut-gv96g4vvwqjc6x7-3000.app.github.dev/",
       "https://webli.vercel.app",
     ],
     methods: ["GET", "POST"],
