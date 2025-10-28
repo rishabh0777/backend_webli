@@ -34,6 +34,7 @@ app.post("/send", async (req, res) => {
       success: false,
       message: "All fields are required",
     });
+    console.log('all fields are required')
   }
 
   // Check environment variables
@@ -42,6 +43,7 @@ app.post("/send", async (req, res) => {
       success: false,
       message: "Email credentials not configured properly",
     });
+    console.log('email credentials not configured properly')
   }
 
   try {
@@ -55,6 +57,7 @@ app.post("/send", async (req, res) => {
         pass: process.env.BREVO_API_KEY, // your SMTP key from Brevo
       },
     });
+    console.log('Brevo SMTP transporter configured');
 
     // Email template
     const mailOptions = {
